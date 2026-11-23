@@ -1,0 +1,120 @@
+name: CI
+on:
+  pull_request:
+    branches: [main, "exercise/**"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 1. Ta reda på vilka delar av monorepot som PR:en ändrar.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.diff.outputs.backend }}
+      frontend: ${{ steps.diff.outputs.frontend }}
+    steps:
+      - name: Hämta koden
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Vad har ändrats?
+        id: diff
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          git diff --name-only "origin/$BASE...HEAD" | tee changed.txt
+          if grep -qE '^(backend/|\.editorconfig$|\.github/workflows/ci\.yml$)' changed.txt; then
+            echo "backend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "backend=false" >> "$GITHUB_OUTPUT"
+          fi
+          if grep -qE '^(frontend/|\.github/workflows/ci\.yml$)' changed.txt; then
+            echo "frontend=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "frontend=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # 2. Backend: formatering, bygge och tester – bara om backend har ändrats.
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Hämta koden
+        uses: actions/checkout@v7
+
+      - name: Installera .NET 10
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Kontrollera formatering
+        run: dotnet format --verify-no-changes --no-restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Test
+        run: dotnet test --no-build
+
+  # 3. Frontend: lint, formatering, tester och bygge – bara om frontend har ändrats.
+  frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Hämta koden
+        uses: actions/checkout@v7
+
+      - name: Installera Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Installera paket
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Kontrollera formatering
+        run: npm run format:check
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  # 4. Grinden – körs ALLTID och är den enda kontrollen som ska vara krävd i rulesetet.
+  ci-ok:
+    if: always()
+    needs: [changes, backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Samla ihop resultatet
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          BACKEND: ${{ needs.backend.result }}
+          FRONTEND: ${{ needs.frontend.result }}
+        run: |
+          echo "changes: $CHANGES, backend: $BACKEND, frontend: $FRONTEND"
+          if [ "$CHANGES" != "success" ]; then exit 1; fi
+          for r in "$BACKEND" "$FRONTEND"; do
+            if [ "$r" = "failure" ] || [ "$r" = "cancelled" ]; then exit 1; fi
+          done
+          echo "Allt grönt (eller inget att bygga) ✅"
