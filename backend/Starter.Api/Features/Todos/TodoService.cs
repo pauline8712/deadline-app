@@ -22,6 +22,9 @@ public sealed class TodoService(ITodoRepository repository, TimeProvider clock)
         return OperationResult<IReadOnlyList<OverdueTodoResponse>>.Ok(overdue);
     }
 
+    public Task<OperationResult<TodoStatsResponse>> GetStatsAsync(CancellationToken cancellationToken) =>
+        Task.FromResult(OperationResult<TodoStatsResponse>.Ok(new TodoStatsResponse(0, 0, 0, 0)));
+
     public async Task<OperationResult<TodoResponse>> CreateAsync(CreateTodoRequest request, CancellationToken cancellationToken)
     {
         var title = request.Title?.Trim() ?? string.Empty;

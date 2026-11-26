@@ -38,6 +38,13 @@ public sealed class TodosController(TodoService service) : ControllerBase
         return Ok(result.Data);
     }
 
+    [HttpGet("stats")]
+    public async Task<ActionResult<TodoStatsResponse>> Stats(CancellationToken cancellationToken)
+    {
+        var result = await service.GetStatsAsync(cancellationToken);
+        return Ok(result.Data);
+    }
+
     private ObjectResult ToProblem<T>(OperationResult<T> result)
     {
         var status = result.Kind == ErrorKind.NotFound ? StatusCodes.Status404NotFound : StatusCodes.Status400BadRequest;
