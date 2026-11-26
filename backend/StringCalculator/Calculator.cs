@@ -23,6 +23,6 @@ public sealed class Calculator
             throw new ArgumentException($"negatives not allowed: {string.Join(", ", negatives)}");
         }
 
-        return values.Sum();
+        return values.Where(v => v <= 1000).Sum();
     }
 }
