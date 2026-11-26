@@ -16,6 +16,15 @@ public sealed class TodoRepository(AppDbContext db) : ITodoRepository
             .ThenBy(t => t.Id)
             .ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<CompletedDeadline>> ListCompletedDeadlinesAsync(CancellationToken cancellationToken) =>
+        await db.Todos.AsNoTracking()
+            .Where(t => t.IsDone && t.DueDate != null && t.CompletedAt != null)
+            .Select(t => new CompletedDeadline(t.DueDate!.Value, t.CompletedAt!.Value))
+            .ToListAsync(cancellationToken);
+
+    public Task<int> CountOverdueAsync(DateOnly today, CancellationToken cancellationToken) =>
+        db.Todos.CountAsync(TodoDeadlines.IsOverdueOn(today), cancellationToken);
+
     public Task<Todo?> FindAsync(int id, CancellationToken cancellationToken) =>
         db.Todos.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
