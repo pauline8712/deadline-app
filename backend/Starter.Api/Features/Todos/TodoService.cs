@@ -35,6 +35,11 @@ public sealed class TodoService(ITodoRepository repository, TimeProvider clock)
             return OperationResult<TodoResponse>.Invalid($"Title can be at most {TodoRules.MaxTitleLength} characters.");
         }
 
+        if (request.DueDate < SwedishTime.Today(clock))
+        {
+            return OperationResult<TodoResponse>.Invalid("Due date cannot be in the past.");
+        }
+
         var todo = new Todo { Title = title, CreatedAt = clock.GetUtcNow(), DueDate = request.DueDate };
         await repository.AddAsync(todo, cancellationToken);
         await repository.SaveChangesAsync(cancellationToken);
