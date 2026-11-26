@@ -17,4 +17,10 @@ public sealed class CalculatorTests
     {
         Assert.Equal(1, _calculator.Add("1"));
     }
+
+    [Fact]
+    public void Two_numbers_separated_by_comma_returns_their_sum()
+    {
+        Assert.Equal(3, _calculator.Add("1,2"));
+    }
 }
