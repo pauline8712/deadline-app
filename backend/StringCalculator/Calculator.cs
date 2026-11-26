@@ -2,5 +2,5 @@ namespace StringCalculator;
 
 public sealed class Calculator
 {
-    public int Add(string numbers) => 0;
+    public int Add(string numbers) => numbers == "" ? 0 : int.Parse(numbers);
 }
