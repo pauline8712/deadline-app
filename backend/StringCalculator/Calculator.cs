@@ -13,7 +13,7 @@ public sealed class Calculator
         if (numbers.StartsWith("//["))
         {
             var end = numbers.IndexOf("]\n", StringComparison.Ordinal);
-            delimiters.Add(numbers[3..end]);
+            delimiters.AddRange(numbers[3..end].Split("][", StringSplitOptions.None));
             numbers = numbers[(end + 2)..];
         }
         else if (numbers.StartsWith("//"))
