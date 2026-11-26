@@ -11,4 +11,10 @@ public sealed class CalculatorTests
     {
         Assert.Equal(0, _calculator.Add(""));
     }
+
+    [Fact]
+    public void Single_number_returns_that_number()
+    {
+        Assert.Equal(1, _calculator.Add("1"));
+    }
 }
