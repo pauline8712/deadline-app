@@ -49,4 +49,12 @@ public sealed class CalculatorTests
     {
         Assert.Equal(6, _calculator.Add("//[***]\n1***2***3"));
     }
+
+    [Theory]
+    [InlineData("//[*][%]\n1*2%3", 6)]
+    [InlineData("//[**][%%%]\n1**2%%%3", 6)]
+    public void Several_custom_delimiters_can_be_set(string input, int expected)
+    {
+        Assert.Equal(expected, _calculator.Add(input));
+    }
 }
