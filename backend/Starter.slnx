@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="Starter.Api/Starter.Api.csproj" />
   <Project Path="Starter.Tests/Starter.Tests.csproj" />
+  <Project Path="StringCalculator.Tests/StringCalculator.Tests.csproj" />
+  <Project Path="StringCalculator/StringCalculator.csproj" />
 </Solution>
