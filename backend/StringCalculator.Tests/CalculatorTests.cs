@@ -35,4 +35,12 @@ public sealed class CalculatorTests
 
         Assert.Equal("negatives not allowed: -2, -4", error.Message);
     }
+
+    [Theory]
+    [InlineData("2,1001", 2)]
+    [InlineData("2,1000", 1002)]
+    public void Numbers_bigger_than_1000_are_ignored(string input, int expected)
+    {
+        Assert.Equal(expected, _calculator.Add(input));
+    }
 }
