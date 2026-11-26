@@ -16,6 +16,13 @@ public sealed class Calculator
             numbers = numbers[4..];
         }
 
-        return numbers.Split(delimiters.ToArray()).Sum(int.Parse);
+        var values = numbers.Split(delimiters.ToArray()).Select(int.Parse).ToList();
+        var negatives = values.Where(v => v < 0).ToList();
+        if (negatives.Count > 0)
+        {
+            throw new ArgumentException($"negatives not allowed: {string.Join(", ", negatives)}");
+        }
+
+        return values.Sum();
     }
 }
