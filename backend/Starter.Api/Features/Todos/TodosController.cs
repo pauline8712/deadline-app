@@ -38,12 +38,13 @@ public sealed class TodosController(TodoService service, AppDbContext db) : Cont
     public async Task<IActionResult> Overdue()
     {
         var all = await db.Todos.ToListAsync();
+        var today = DateOnly.FromDateTime(DateTime.Now);
         var result = new List<object>();
         foreach (var t in all)
         {
-            if (TodoDeadlines.IsOverdue(t.DueDate, t.IsDone, DateTime.Now))
+            if (TodoDeadlines.IsOverdue(t.DueDate, t.IsDone, today))
             {
-                result.Add(new { t.Id, t.Title, t.DueDate, DaysLate = TodoDeadlines.DaysLate(t.DueDate!.Value, DateTime.Now) });
+                result.Add(new { t.Id, t.Title, t.DueDate, DaysLate = TodoDeadlines.DaysLate(t.DueDate!.Value, today) });
             }
         }
 
