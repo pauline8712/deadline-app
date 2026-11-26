@@ -23,7 +23,7 @@ public sealed class TodoService(ITodoRepository repository, TimeProvider clock)
     }
 
     public Task<OperationResult<TodoStatsResponse>> GetStatsAsync(CancellationToken cancellationToken) =>
-        Task.FromResult(OperationResult<TodoStatsResponse>.Ok(new TodoStatsResponse(0, 0, 0, 0)));
+        Task.FromResult(OperationResult<TodoStatsResponse>.Ok(new TodoStatsResponse(0, 0, 0, null)));
 
     public async Task<OperationResult<TodoResponse>> CreateAsync(CreateTodoRequest request, CancellationToken cancellationToken)
     {
