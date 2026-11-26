@@ -77,5 +77,7 @@ first exercise of the course.
 |---|---|---|
 | GET | `/health` | `200 { status: "ok" }` |
 | GET | `/api/todos` | `200` list of todos |
-| POST | `/api/todos` | `201` created todo, `400` if the title is empty or too long |
+| POST | `/api/todos` | `201` created todo, `400` if the title is empty or too long, or the due date has passed |
 | PUT | `/api/todos/{id}/done` | `200` updated todo, `404` if it doesn't exist |
+| GET | `/api/todos/overdue` | `200` overdue todos with `daysLate`, in Swedish time |
+| GET | `/api/todos/stats` | `200` `{ doneOnTime, doneLate, overdueNow, onTimeRate }`, where `onTimeRate` is `null` when there is no data yet |
