@@ -21,4 +21,10 @@ public sealed class CalculatorTests
     {
         Assert.Equal(6, _calculator.Add("1\n2,3"));
     }
+
+    [Fact]
+    public void Custom_delimiter_can_be_set_on_the_first_line()
+    {
+        Assert.Equal(3, _calculator.Add("//;\n1;2"));
+    }
 }
