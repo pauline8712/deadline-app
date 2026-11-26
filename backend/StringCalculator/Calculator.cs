@@ -1,7 +1,11 @@
 namespace StringCalculator;
 
+/// <summary>Roy Osheroves String Calculator-kata, byggd ett krav i taget med TDD.</summary>
 public sealed class Calculator
 {
+    private const int MaxValue = 1000;
+    private static readonly string[] DefaultDelimiters = [",", "\n"];
+
     public int Add(string numbers)
     {
         if (numbers.Length == 0)
@@ -9,26 +13,34 @@ public sealed class Calculator
             return 0;
         }
 
-        var delimiters = new List<string> { ",", "\n" };
-        if (numbers.StartsWith("//["))
+        var (delimiters, body) = ParseHeader(numbers);
+        var values = body.Split(delimiters, StringSplitOptions.None).Select(int.Parse).ToList();
+        ThrowIfAnyNegative(values);
+        return values.Where(v => v <= MaxValue).Sum();
+    }
+
+    /// <summary>Läser en valfri första rad: "//;\n", "//[***]\n" eller "//[*][%]\n".</summary>
+    private static (string[] Delimiters, string Body) ParseHeader(string numbers)
+    {
+        if (!numbers.StartsWith("//", StringComparison.Ordinal))
         {
-            var end = numbers.IndexOf("]\n", StringComparison.Ordinal);
-            delimiters.AddRange(numbers[3..end].Split("][", StringSplitOptions.None));
-            numbers = numbers[(end + 2)..];
-        }
-        else if (numbers.StartsWith("//"))
-        {
-            delimiters.Add(numbers[2].ToString());
-            numbers = numbers[4..];
+            return (DefaultDelimiters, numbers);
         }
 
-        var values = numbers.Split(delimiters.ToArray(), StringSplitOptions.None).Select(int.Parse).ToList();
+        var headerEnd = numbers.IndexOf('\n');
+        var header = numbers[2..headerEnd];
+        var custom = header.StartsWith('[')
+            ? header[1..^1].Split("][", StringSplitOptions.None)
+            : [header];
+        return ([.. DefaultDelimiters, .. custom], numbers[(headerEnd + 1)..]);
+    }
+
+    private static void ThrowIfAnyNegative(IEnumerable<int> values)
+    {
         var negatives = values.Where(v => v < 0).ToList();
         if (negatives.Count > 0)
         {
             throw new ArgumentException($"negatives not allowed: {string.Join(", ", negatives)}");
         }
-
-        return values.Where(v => v <= 1000).Sum();
     }
 }
