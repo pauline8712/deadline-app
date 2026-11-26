@@ -8,7 +8,7 @@ namespace Starter.Api.Features.Todos;
 /// <summary>Thin on purpose: receive the request, call the service, translate the result to HTTP.</summary>
 [ApiController]
 [Route("api/todos")]
-public sealed class TodosController(TodoService service, AppDbContext db) : ControllerBase
+public sealed class TodosController(TodoService service, AppDbContext db, TimeProvider clock) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<TodoResponse>>> List(CancellationToken cancellationToken)
@@ -38,7 +38,7 @@ public sealed class TodosController(TodoService service, AppDbContext db) : Cont
     public async Task<IActionResult> Overdue()
     {
         var all = await db.Todos.ToListAsync();
-        var today = DateOnly.FromDateTime(DateTime.Now);
+        var today = SwedishTime.Today(clock);
         var result = new List<object>();
         foreach (var t in all)
         {
