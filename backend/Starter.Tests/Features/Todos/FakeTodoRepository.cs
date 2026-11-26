@@ -14,6 +14,10 @@ internal sealed class FakeTodoRepository : ITodoRepository
     public Task<IReadOnlyList<Todo>> ListAsync(CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<Todo>>(_todos.OrderByDescending(t => t.Id).ToList());
 
+    public Task<IReadOnlyList<Todo>> ListOverdueAsync(DateOnly today, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<Todo>>(
+            _todos.Where(t => TodoDeadlines.IsOverdue(t, today)).OrderBy(t => t.DueDate).ThenBy(t => t.Id).ToList());
+
     public Task<Todo?> FindAsync(int id, CancellationToken cancellationToken) =>
         Task.FromResult(_todos.FirstOrDefault(t => t.Id == id));
 

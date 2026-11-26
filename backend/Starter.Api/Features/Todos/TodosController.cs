@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Starter.Api.Data;
 using Starter.Api.Shared;
 
 namespace Starter.Api.Features.Todos;
@@ -8,7 +6,7 @@ namespace Starter.Api.Features.Todos;
 /// <summary>Thin on purpose: receive the request, call the service, translate the result to HTTP.</summary>
 [ApiController]
 [Route("api/todos")]
-public sealed class TodosController(TodoService service, AppDbContext db) : ControllerBase
+public sealed class TodosController(TodoService service) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<TodoResponse>>> List(CancellationToken cancellationToken)
@@ -33,21 +31,11 @@ public sealed class TodosController(TodoService service, AppDbContext db) : Cont
         return result.Success ? Ok(result.Data) : ToProblem(result);
     }
 
-    // Snabbfix inför kunddemon. Funkar på min dator! /Kim
     [HttpGet("overdue")]
-    public async Task<IActionResult> Overdue()
+    public async Task<ActionResult<IReadOnlyList<OverdueTodoResponse>>> Overdue(CancellationToken cancellationToken)
     {
-        var all = await db.Todos.ToListAsync();
-        var result = new List<object>();
-        foreach (var t in all)
-        {
-            if (t.DueDate != null && t.DueDate < DateTime.Now && t.IsDone == false)
-            {
-                result.Add(new { t.Id, t.Title, t.DueDate, DaysLate = (DateTime.Now - t.DueDate.Value).Days });
-            }
-        }
-
-        return Ok(result);
+        var result = await service.ListOverdueAsync(cancellationToken);
+        return Ok(result.Data);
     }
 
     private ObjectResult ToProblem<T>(OperationResult<T> result)

@@ -9,6 +9,13 @@ public sealed class TodoRepository(AppDbContext db) : ITodoRepository
     public async Task<IReadOnlyList<Todo>> ListAsync(CancellationToken cancellationToken) =>
         await db.Todos.AsNoTracking().OrderByDescending(t => t.Id).ToListAsync(cancellationToken);
 
+    public async Task<IReadOnlyList<Todo>> ListOverdueAsync(DateOnly today, CancellationToken cancellationToken) =>
+        await db.Todos.AsNoTracking()
+            .Where(TodoDeadlines.IsOverdueOn(today))
+            .OrderBy(t => t.DueDate)
+            .ThenBy(t => t.Id)
+            .ToListAsync(cancellationToken);
+
     public Task<Todo?> FindAsync(int id, CancellationToken cancellationToken) =>
         db.Todos.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
