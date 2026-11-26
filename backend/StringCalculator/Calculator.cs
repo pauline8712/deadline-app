@@ -9,14 +9,20 @@ public sealed class Calculator
             return 0;
         }
 
-        var delimiters = new List<char> { ',', '\n' };
-        if (numbers.StartsWith("//"))
+        var delimiters = new List<string> { ",", "\n" };
+        if (numbers.StartsWith("//["))
         {
-            delimiters.Add(numbers[2]);
+            var end = numbers.IndexOf("]\n", StringComparison.Ordinal);
+            delimiters.Add(numbers[3..end]);
+            numbers = numbers[(end + 2)..];
+        }
+        else if (numbers.StartsWith("//"))
+        {
+            delimiters.Add(numbers[2].ToString());
             numbers = numbers[4..];
         }
 
-        var values = numbers.Split(delimiters.ToArray()).Select(int.Parse).ToList();
+        var values = numbers.Split(delimiters.ToArray(), StringSplitOptions.None).Select(int.Parse).ToList();
         var negatives = values.Where(v => v < 0).ToList();
         if (negatives.Count > 0)
         {
