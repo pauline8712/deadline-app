@@ -12,4 +12,7 @@ public sealed class Todo
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateOnly? DueDate { get; set; }
+
+    /// <summary>När uppgiften markerades som klar. Behövs för att räkna "klar i tid" (US-4).</summary>
+    public DateTimeOffset? CompletedAt { get; set; }
 }

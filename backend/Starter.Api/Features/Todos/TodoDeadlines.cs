@@ -13,5 +13,8 @@ public static class TodoDeadlines
     /// <summary>Samma regel för en enskild uppgift i minnet.</summary>
     public static bool IsOverdue(Todo todo, DateOnly today) => IsOverdueOn(today).Compile()(todo);
 
+    /// <summary>Klar i tid = klar senast på förfallodagen, i svensk tid. "Fredag betyder hela fredagen."</summary>
+    public static bool WasDoneOnTime(DateOnly dueDate, DateOnly completedOn) => completedOn <= dueDate;
+
     public static int DaysLate(DateOnly dueDate, DateOnly today) => today.DayNumber - dueDate.DayNumber;
 }

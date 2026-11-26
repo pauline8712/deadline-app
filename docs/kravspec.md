@@ -52,9 +52,35 @@ samma dag som de ska vara klara.
 - Finns det ingen klar uppgift med förfallodatum än är svaret **"ingen data än"**, inte 0 %
   (kursmaterialet).
 
-**Uppföljning** ⚠️ ANTAGANDE: Jag och Sara läser av `GET /api/todos/stats` tillsammans en gång i veckan
-under de fyra veckorna, och jämför med nuläget 60 %. Efter fyra veckor har vi ett uppföljningsmöte där vi
-bestämmer om målet är nått. Exakt dag bestäms med Sara. Avsnittet skrivs klart i övning 8.
+### Uppföljning: hur, när och med vem
+
+⚠️ ANTAGANDE: upplägget nedan är mitt förslag och ska bekräftas av Sara.
+
+- **Hur:** Jag läser av `GET /api/todos/stats`. Svaret innehåller klara i tid, klara sent, försenade just nu
+  och andelen klara i tid. Siffrorna skrivs in i tabellen nedan, så att vi ser trenden och inte bara en enskild
+  siffra.
+- **När:** Första gången samma dag som funktionen tas i drift (vecka 0). Därefter en gång i veckan, på samma
+  veckodag, i fyra veckor.
+- **Med vem:** Med Sara, som teamledare och den som satte målet. Varje avläsning tar fem minuter. Efter
+  vecka 4 har vi ett uppföljningsmöte på 30 minuter, där vi bestämmer om målet är nått och vad som händer härnäst.
+- **Om vi inte når målet:** Vi tittar på "försenade just nu" och på vilka uppgifter som blev klara sent, och
+  frågar teamet varför. Siffran säger *att* något är fel, inte *vad*.
+
+Två saker att tänka på när vi läser siffran:
+
+1. Nuläget 60 % är Saras uppskattning och inte uppmätt i appen. Den första riktiga jämförelsen blir därför
+   mellan vecka 1 och vecka 4, inte mellan 60 % och vecka 4.
+2. Uppgifter som markerades som klara innan `CompletedAt` fanns har ingen klar-tidpunkt och räknas inte.
+   Siffran bygger alltså bara på data från driftstarten och framåt. De första veckorna kan den hoppa mycket,
+   eftersom underlaget är litet. Svaret `onTimeRate: null` betyder "ingen data än", inte 0 %.
+
+| Vecka | Datum | Klara i tid | Klara sent | Försenade just nu | Andel klara i tid | Kommentar |
+|---|---|---:|---:|---:|---:|---|
+| 0 | | | | | | Driftstart |
+| 1 | | | | | | |
+| 2 | | | | | | |
+| 3 | | | | | | |
+| 4 | | | | | | Uppföljningsmöte: målet är 85 % |
 
 ---
 
