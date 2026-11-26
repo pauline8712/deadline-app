@@ -2,17 +2,25 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 using Starter.Api.Features.Todos;
 
 namespace Starter.Tests.Features.Todos;
 
-/// <summary>Starts the real API in memory, with its own throwaway SQLite file, and talks to it over HTTP.</summary>
+/// <summary>Starts the real API in memory, with its own throwaway SQLite file and a fake clock, and talks to it over HTTP.</summary>
 public sealed class TodosApiTests : IClassFixture<TodosApiTests.ApiFactory>
 {
+    /// <summary>Måndag 2026-11-16 kl. 09:00 i Sverige (vintertid, UTC+1).</summary>
+    private static readonly DateTimeOffset MondayNineSwedishTime = new(2026, 11, 16, 8, 0, 0, TimeSpan.Zero);
+
+    private readonly ApiFactory _factory;
     private readonly HttpClient _client;
 
     public TodosApiTests(ApiFactory factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
@@ -35,12 +43,30 @@ public sealed class TodosApiTests : IClassFixture<TodosApiTests.ApiFactory>
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    [Trait("Krav", "AK-2.1")]
+    public async Task A_todo_due_today_is_not_overdue_at_nine_in_the_morning()
+    {
+        _factory.Clock.SetUtcNow(MondayNineSwedishTime);
+        var created = await _client.PostAsJsonAsync("/api/todos", new CreateTodoRequest("Skicka offert", new DateOnly(2026, 11, 16)));
+        var offer = await created.Content.ReadFromJsonAsync<TodoResponse>();
+
+        var overdue = await _client.GetFromJsonAsync<List<OverdueTodoResponse>>("/api/todos/overdue");
+
+        Assert.DoesNotContain(overdue!, t => t.Id == offer!.Id);
+    }
+
     public sealed class ApiFactory : WebApplicationFactory<Program>
     {
         private readonly string _databasePath = Path.Combine(Path.GetTempPath(), $"starter-test-{Guid.NewGuid()}.db");
 
-        protected override void ConfigureWebHost(IWebHostBuilder builder) =>
+        public FakeTimeProvider Clock { get; } = new(MondayNineSwedishTime);
+
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
+        {
             builder.UseSetting("ConnectionStrings:Default", $"Data Source={_databasePath}");
+            builder.ConfigureTestServices(services => services.AddSingleton<TimeProvider>(Clock));
+        }
 
         protected override void Dispose(bool disposing)
         {
