@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Time.Testing;
 using Starter.Api.Features.Todos;
 using Starter.Api.Shared;
 
@@ -5,12 +6,24 @@ namespace Starter.Tests.Features.Todos;
 
 public sealed class TodoServiceTests
 {
+    /// <summary>Måndag 2026-11-16 kl. 10:00 i Sverige (vintertid, UTC+1).</summary>
+    private readonly FakeTimeProvider _clock = new(new DateTimeOffset(2026, 11, 16, 9, 0, 0, TimeSpan.Zero));
     private readonly FakeTodoRepository _repository = new();
     private readonly TodoService _service;
 
     public TodoServiceTests()
     {
-        _service = new TodoService(_repository, TimeProvider.System);
+        _service = new TodoService(_repository, _clock);
+    }
+
+    [Fact]
+    [Trait("Krav", "AK-1.2")]
+    public async Task Create_returns_validation_error_when_due_date_has_passed()
+    {
+        var result = await _service.CreateAsync(new CreateTodoRequest("Skicka offert", new DateOnly(2026, 11, 15)), CancellationToken.None);
+
+        Assert.Equal(ErrorKind.Validation, result.Kind);
+        Assert.Empty(_repository.Saved);
     }
 
     [Fact]
