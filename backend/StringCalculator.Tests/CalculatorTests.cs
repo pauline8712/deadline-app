@@ -43,4 +43,10 @@ public sealed class CalculatorTests
     {
         Assert.Equal(expected, _calculator.Add(input));
     }
+
+    [Fact]
+    public void Custom_delimiter_can_be_any_length()
+    {
+        Assert.Equal(6, _calculator.Add("//[***]\n1***2***3"));
+    }
 }
