@@ -32,8 +32,10 @@ public sealed class TodoRepository(AppDbContext db, TeamContext team) : ITodoRep
             .Where(t => t.TeamId == TeamId && !t.IsDeleted && EF.Functions.Like(t.Title, $"%{query}%"))
             .ToListAsync(cancellationToken);
 
+    // Filter on the caller's team in every query, not just the list (MB-1). Another team's todo
+    // simply doesn't exist for the caller, so the API answers 404 and never reveals that it's there.
     public Task<Todo?> FindAsync(int id, CancellationToken cancellationToken) =>
-        db.Todos.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+        db.Todos.FirstOrDefaultAsync(t => t.Id == id && t.TeamId == TeamId, cancellationToken);
 
     public async Task AddAsync(Todo todo, CancellationToken cancellationToken)
     {
