@@ -27,7 +27,9 @@ public sealed class TodoService(ITodoRepository repository, TimeProvider clock)
         var completed = await repository.ListCompletedDeadlinesAsync(cancellationToken);
         var doneOnTime = completed.Count(c => TodoDeadlines.WasDoneOnTime(c.DueDate, SwedishTime.DateOf(c.CompletedAt)));
         var doneLate = completed.Count - doneOnTime;
-        return OperationResult<TodoStatsResponse>.Ok(new TodoStatsResponse(doneOnTime, doneLate, 0, null));
+        var overdueNow = await repository.CountOverdueAsync(SwedishTime.Today(clock), cancellationToken);
+        double? onTimeRate = completed.Count == 0 ? null : (double)doneOnTime / completed.Count;
+        return OperationResult<TodoStatsResponse>.Ok(new TodoStatsResponse(doneOnTime, doneLate, overdueNow, onTimeRate));
     }
 
     public async Task<OperationResult<TodoResponse>> CreateAsync(CreateTodoRequest request, CancellationToken cancellationToken)
