@@ -67,6 +67,15 @@ public sealed class TodosApiTests : IClassFixture<TodosApiTests.ApiFactory>
     }
 
     [Fact]
+    [Trait("Krav", "AK-3.4")]
+    public async Task Marking_a_todo_that_does_not_exist_as_done_returns_404()
+    {
+        var response = await _client.PutAsync("/api/todos/999/done", null);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     [Trait("Krav", "AK-2.1")]
     public async Task A_todo_due_today_is_not_overdue_at_nine_in_the_morning()
     {
