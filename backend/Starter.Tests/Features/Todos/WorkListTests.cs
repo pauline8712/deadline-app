@@ -29,6 +29,19 @@ public sealed class WorkListTests
         Assert.Equal(["Försenad", "Idag", "I morgon"], titles);
     }
 
+    [Fact]
+    [Trait("Krav", "AK-3.2")]
+    public async Task Todos_without_a_due_date_come_after_todos_with_one()
+    {
+        await CreateAsync("Utan datum", null);
+        await CreateAsync("Fredag", new DateOnly(2026, 11, 20));
+        GoToMonday();
+
+        var titles = await ListTitlesAsync();
+
+        Assert.Equal(["Fredag", "Utan datum"], titles);
+    }
+
     private async Task<TodoResponse> CreateAsync(string title, DateOnly? dueDate) =>
         (await _service.CreateAsync(new CreateTodoRequest(title, dueDate), CancellationToken.None)).Data!;
 
