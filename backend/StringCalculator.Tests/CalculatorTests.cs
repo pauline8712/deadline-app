@@ -27,4 +27,12 @@ public sealed class CalculatorTests
     {
         Assert.Equal(3, _calculator.Add("//;\n1;2"));
     }
+
+    [Fact]
+    public void Negative_numbers_throw_and_list_every_negative()
+    {
+        var error = Assert.Throws<ArgumentException>(() => _calculator.Add("1,-2,3,-4"));
+
+        Assert.Equal("negatives not allowed: -2, -4", error.Message);
+    }
 }
