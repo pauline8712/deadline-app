@@ -12,6 +12,16 @@ public sealed class TodoService(ITodoRepository repository, TimeProvider clock)
         return OperationResult<IReadOnlyList<TodoResponse>>.Ok(todos.Select(ToResponse).ToList());
     }
 
+    public async Task<OperationResult<IReadOnlyList<OverdueTodoResponse>>> ListOverdueAsync(CancellationToken cancellationToken)
+    {
+        var today = SwedishTime.Today(clock);
+        var todos = await repository.ListOverdueAsync(today, cancellationToken);
+        var overdue = todos
+            .Select(t => new OverdueTodoResponse(t.Id, t.Title, t.DueDate!.Value, TodoDeadlines.DaysLate(t.DueDate.Value, today)))
+            .ToList();
+        return OperationResult<IReadOnlyList<OverdueTodoResponse>>.Ok(overdue);
+    }
+
     public async Task<OperationResult<TodoResponse>> CreateAsync(CreateTodoRequest request, CancellationToken cancellationToken)
     {
         var title = request.Title?.Trim() ?? string.Empty;
