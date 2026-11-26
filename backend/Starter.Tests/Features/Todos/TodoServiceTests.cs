@@ -27,6 +27,16 @@ public sealed class TodoServiceTests
     }
 
     [Fact]
+    [Trait("Krav", "AK-1.3")]
+    public async Task Create_accepts_a_due_date_of_today()
+    {
+        var result = await _service.CreateAsync(new CreateTodoRequest("Skicka offert", new DateOnly(2026, 11, 16)), CancellationToken.None);
+
+        Assert.True(result.Success);
+        Assert.Equal(new DateOnly(2026, 11, 16), result.Data!.DueDate);
+    }
+
+    [Fact]
     public async Task Create_trims_title_and_saves_the_todo()
     {
         var result = await _service.CreateAsync(new CreateTodoRequest("  Buy milk  "), CancellationToken.None);
