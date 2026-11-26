@@ -15,4 +15,10 @@ public sealed class CalculatorTests
     {
         Assert.Equal(expected, _calculator.Add(input));
     }
+
+    [Fact]
+    public void Newline_also_separates_numbers()
+    {
+        Assert.Equal(6, _calculator.Add("1\n2,3"));
+    }
 }
