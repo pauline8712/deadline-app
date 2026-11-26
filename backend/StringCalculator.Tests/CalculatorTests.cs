@@ -23,4 +23,10 @@ public sealed class CalculatorTests
     {
         Assert.Equal(3, _calculator.Add("1,2"));
     }
+
+    [Fact]
+    public void Any_amount_of_numbers_returns_their_sum()
+    {
+        Assert.Equal(15, _calculator.Add("1,2,3,4,5"));
+    }
 }
