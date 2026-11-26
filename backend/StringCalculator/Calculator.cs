@@ -9,7 +9,12 @@ public sealed class Calculator
             return 0;
         }
 
-        var parts = numbers.Split(',');
-        return parts.Length == 1 ? int.Parse(parts[0]) : int.Parse(parts[0]) + int.Parse(parts[1]);
+        var sum = 0;
+        foreach (var part in numbers.Split(','))
+        {
+            sum += int.Parse(part);
+        }
+
+        return sum;
     }
 }
