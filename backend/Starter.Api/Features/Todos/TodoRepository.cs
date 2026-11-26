@@ -27,9 +27,9 @@ public sealed class TodoRepository(AppDbContext db, TeamContext team) : ITodoRep
         Overdue(today).CountAsync(cancellationToken);
 
     public async Task<IReadOnlyList<Todo>> SearchAsync(string query, CancellationToken cancellationToken) =>
-        await db.Todos
-            .FromSqlRaw($"SELECT * FROM Todos WHERE TeamId = {TeamId} AND IsDeleted = 0 AND Title LIKE '%{query}%'")
-            .AsNoTracking()
+        // LINQ, not SQL built from text (MB-2): EF Core sends the search text as a parameter, so it can never become SQL.
+        await db.Todos.AsNoTracking()
+            .Where(t => t.TeamId == TeamId && !t.IsDeleted && EF.Functions.Like(t.Title, $"%{query}%"))
             .ToListAsync(cancellationToken);
 
     public Task<Todo?> FindAsync(int id, CancellationToken cancellationToken) =>
