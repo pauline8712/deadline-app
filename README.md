@@ -45,6 +45,20 @@ npm run dev
 
 If your API runs on another port, copy `frontend/.env.example` to `frontend/.env.local` and change `VITE_API_URL`.
 
+## Prestanda
+
+Uppmätt på en Intel Core i5-8350U med 16 GB minne. Alla detaljer finns i [`docs/matning.md`](docs/matning.md).
+
+| Krav | Mål | Uppmätt | Håller? |
+|---|---|---|---|
+| IK-2: sortera arbetslistan, 1 000 uppgifter | < 1 ms | 0,34 ms | ✅ |
+| IK-1: `GET /api/todos`, 1 000 uppgifter, 20 användare | p99 < 200 ms, 0 fel | p99 94–163 ms, 0 fel | ✅ |
+
+```bash
+cd backend
+dotnet run -c Release --project Starter.Benchmarks -- --filter "*" --job short
+```
+
 ## Quality checks
 
 | What | Backend | Frontend |
