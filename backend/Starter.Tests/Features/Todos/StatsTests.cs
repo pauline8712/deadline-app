@@ -28,6 +28,21 @@ public sealed class StatsTests
         Assert.Null(stats.OnTimeRate);
     }
 
+    [Fact]
+    [Trait("Krav", "AK-4.1")]
+    public async Task A_todo_done_late_on_its_due_date_is_done_on_time()
+    {
+        var todo = await CreateAsync("Skicka offert", Monday);
+
+        _clock.SetUtcNow(new DateTimeOffset(2026, 11, 16, 22, 0, 0, TimeSpan.Zero)); // 23:00 den 16:e i Sverige
+        await _service.MarkDoneAsync(todo.Id, CancellationToken.None);
+        var stats = await GetStatsAsync();
+
+        Assert.Equal(_clock.GetUtcNow(), _repository.Saved.Single().CompletedAt);
+        Assert.Equal(1, stats.DoneOnTime);
+        Assert.Equal(0, stats.DoneLate);
+    }
+
     private async Task<TodoResponse> CreateAsync(string title, DateOnly? dueDate) =>
         (await _service.CreateAsync(new CreateTodoRequest(title, dueDate), CancellationToken.None)).Data!;
 
