@@ -9,7 +9,7 @@ public sealed class TodoService(ITodoRepository repository, TimeProvider clock)
     public async Task<OperationResult<IReadOnlyList<TodoResponse>>> ListAsync(CancellationToken cancellationToken)
     {
         var todos = await repository.ListAsync(cancellationToken);
-        return OperationResult<IReadOnlyList<TodoResponse>>.Ok(todos.Select(ToResponse).ToList());
+        return OperationResult<IReadOnlyList<TodoResponse>>.Ok(todos.OrderBy(t => t.DueDate).Select(ToResponse).ToList());
     }
 
     public async Task<OperationResult<IReadOnlyList<OverdueTodoResponse>>> ListOverdueAsync(CancellationToken cancellationToken)
